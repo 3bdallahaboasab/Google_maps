@@ -91,7 +91,7 @@ class MapSampleState extends State<MapSample> {
                   ElevatedButton(
                       style: ButtonStyle(
                           backgroundColor: MaterialStatePropertyAll(
-                              isSelected ? Colors.orange : Colors.white)),
+                              isSelected ? Colors.blue : Colors.white)),
                       onPressed: () {
                         changeMapType();
                       },
@@ -110,8 +110,10 @@ class MapSampleState extends State<MapSample> {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           FloatingActionButton(
-            onPressed: () {
-              _drawPolyline(LatLng(31.908137980134477, 35.92299565556362),
+            onPressed: () async {
+              myLocation = await LocationServices().getLocation();
+              _drawPolyline(
+                  LatLng(myLocation!.latitude!, myLocation!.longitude!),
                   currentLocation);
             },
             child: Icon(Icons.settings_ethernet_rounded),
@@ -231,9 +233,6 @@ class MapSampleState extends State<MapSample> {
     Polyline polyline = await PolylineService().drawPolyline(from, to);
 
     _polylines.add(polyline);
-
-    _setMarker(from);
-    _setMarker(to);
 
     setState(() {});
   }

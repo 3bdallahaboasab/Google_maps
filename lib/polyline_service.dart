@@ -19,7 +19,7 @@ class PolylineService {
     _calcDistance(polylineCoordinates);
     return Polyline(
         polylineId: PolylineId("polyline_id ${result.points.length}"),
-        color: Colors.purple,
+        color: Colors.red,
         width: 3,
         points: polylineCoordinates);
   }
