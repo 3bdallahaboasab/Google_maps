@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:google_maps/test.dart';
+import 'package:google_maps/timer.dart';
 
 import 'image_piker.dart';
 import 'maps.dart';
@@ -38,7 +39,7 @@ class MyApp extends StatelessWidget {
         useMaterial3: true,
         primarySwatch: Colors.blue,
       ),
-      home: MyWidget(),
+      home: MapSample(),
     );
   }
 }

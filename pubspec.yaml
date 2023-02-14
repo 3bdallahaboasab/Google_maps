@@ -45,6 +45,10 @@ dependencies:
   google_api_headers: ^1.5.0+1
   image_picker: ^0.8.6+1
   easy_localization: ^1.3.0
+  circular_countdown_timer: ^0.2.3
+  url_launcher: ^6.1.9
+  timer_count_down: ^2.2.2
+  flutter_polyline_points: ^1.0.0
 
 dev_dependencies:
   flutter_test:

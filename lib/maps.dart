@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_google_places/flutter_google_places.dart';
 import 'package:google_api_headers/google_api_headers.dart';
 import 'package:google_maps/location.dart';
+import 'package:google_maps/polyline_service.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:location/location.dart';
 import 'package:google_maps_webservice/places.dart';
@@ -21,11 +22,14 @@ class MapSampleState extends State<MapSample> {
       Completer<GoogleMapController>();
   static final CameraPosition _initialCameraPosition = CameraPosition(
     target: LatLng(31.908137980134477, 35.92299565556362),
-    zoom: 14.4746,
+    zoom: 16.4746,
   );
   final Set<Marker> _markers = {};
+  Set<Polyline> _polylines = {};
   BitmapDescriptor? _locationIcon;
   LatLng currentLocation = _initialCameraPosition.target;
+  MapType maptype = MapType.normal;
+  bool isSelected = false;
 
   @override
   void initState() {
@@ -59,17 +63,17 @@ class MapSampleState extends State<MapSample> {
           alignment: Alignment.center,
           children: [
             GoogleMap(
-              // indoorViewEnabled: false,
+              polylines: _polylines,
+              indoorViewEnabled: true,
+              zoomControlsEnabled: false,
               markers: _markers,
-              myLocationButtonEnabled: false,
+              // myLocationButtonEnabled: true,
               compassEnabled: true,
-              buildingsEnabled: false,
-              myLocationEnabled: true,
-              mapToolbarEnabled: false,
-
-              mapType: MapType.normal,
+              buildingsEnabled: true,
+              mapToolbarEnabled: true,
+              mapType: maptype,
               onCameraMove: (e) => currentLocation = e.target,
-              trafficEnabled: true,
+              trafficEnabled: false,
               initialCameraPosition: _initialCameraPosition,
               onMapCreated: (GoogleMapController controller) {
                 _controller.complete(controller);
@@ -80,12 +84,47 @@ class MapSampleState extends State<MapSample> {
               height: 40,
               child: Image.asset('assets/marker.png'),
             ),
+            Padding(
+              padding: const EdgeInsets.all(10.0),
+              child: Column(
+                children: [
+                  ElevatedButton(
+                      style: ButtonStyle(
+                          backgroundColor: MaterialStatePropertyAll(
+                              isSelected ? Colors.orange : Colors.white)),
+                      onPressed: () {
+                        changeMapType();
+                      },
+                      child: Icon(
+                        Icons.map_outlined,
+                        color: isSelected ? Colors.white : Colors.blue,
+                      )),
+                ],
+              ),
+            ),
           ],
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: getMyLocation,
-        child: Icon(Icons.my_location_rounded),
+      floatingActionButton: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          FloatingActionButton(
+            onPressed: () {
+              _drawPolyline(LatLng(31.908137980134477, 35.92299565556362),
+                  currentLocation);
+            },
+            child: Icon(Icons.settings_ethernet_rounded),
+          ),
+          SizedBox(
+            width: 10,
+          ),
+          FloatingActionButton(
+            onPressed: getMyLocation,
+            child: Icon(Icons.my_location_rounded),
+            tooltip: "Get my location ",
+          ),
+        ],
       ),
     );
   }
@@ -117,9 +156,10 @@ class MapSampleState extends State<MapSample> {
     _getLocationFromPlaceId(p!.placeId!);
   }
 
+  LocationData? myLocation;
   Future<void> getMyLocation() async {
-    LocationData myLocation = await LocationServices().getLocation();
-    animateCamera2(myLocation);
+    myLocation = await LocationServices().getLocation();
+    animateCamera2(myLocation!);
   }
 
   Future<void> animateCamera2(LocationData location) async {
@@ -178,5 +218,23 @@ class MapSampleState extends State<MapSample> {
     print(
         "animating camera to (lat: ${_location.latitude}, long: ${_location.longitude}");
     controller.animateCamera(CameraUpdate.newCameraPosition(_cameraPosition));
+  }
+
+  void changeMapType() {
+    setState(() {
+      maptype = maptype == MapType.normal ? MapType.satellite : MapType.normal;
+      isSelected = !isSelected;
+    });
+  }
+
+  Future<void> _drawPolyline(LatLng from, LatLng to) async {
+    Polyline polyline = await PolylineService().drawPolyline(from, to);
+
+    _polylines.add(polyline);
+
+    _setMarker(from);
+    _setMarker(to);
+
+    setState(() {});
   }
 }
